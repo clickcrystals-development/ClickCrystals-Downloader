@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "clickcrystals-updater",
+	"version": "${version}",
+	"name": "ClickCrystals Auto Update",
+	"description": "Mod for updating your ClickCrystals",
+	"authors": [
+		"I-No-oNe"
+	],
+	"contact": {
+		"homepage": "https://github.com/clickcrystals-development",
+		"sources": "https://github.com/clickcrystals-development/ClickCrystals-Auto-Updater"
+	},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"client": [
+			"net.i_no_am.clickcrystals.ModDownloader"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"minecraft": ">=${minecraft_version}",
+			"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "ClickCrystals"
+	}
+}
