@@ -12,6 +12,7 @@
 		"sources": "https://github.com/clickcrystals-development/ClickCrystals-Auto-Updater"
 	},
 	"license": "MIT",
+	"icon": "assets/clickcrystals-updater/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"client": [

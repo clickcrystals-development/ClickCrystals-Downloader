@@ -76,7 +76,7 @@ public class ModDownloader implements ClientModInitializer {
 			gameVersion = container.getMetadata().getVersion().getFriendlyString();
 		}
 		return switch (Objects.requireNonNull(gameVersion)) {
-			case "1.20.1" -> "1.20.2";
+			case "1.20.1" -> "1.20";
 			case "1.20.3" -> "1.20.4";
 			case "1.20.5" -> "1.20.6";
 			default -> gameVersion;
