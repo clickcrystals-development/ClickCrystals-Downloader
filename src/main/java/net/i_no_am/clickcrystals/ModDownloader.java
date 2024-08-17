@@ -1,85 +1,122 @@
 package net.i_no_am.clickcrystals;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.Gson;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.HttpURLConnection;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
-import java.nio.file.Paths;
-import java.util.Objects;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
 public class ModDownloader implements ClientModInitializer {
-	private static final Logger LOGGER = Logger.getLogger(ModDownloader.class.getName());
+
+	public static final String REPO = "https://github.com/clickcrystals-development/ClickCrystals";
+	public static final String INFO_LINK = "https://itzispyder.github.io/clickcrystals/info";
+	public static final Logger LOGGER = LoggerFactory.getLogger("ClickCrystals Downloader");
 
 	@Override
 	public void onInitializeClient() {
-		String version = "ClickCrystals-" + getGameVersion() + "-" + getLatestClickCrystalsVersion();
-		File file = Paths.get(FabricLoader.getInstance().getGameDir().toString(), "mods", version + ".jar").toFile();
-		boolean wasBefore = file.exists();
-
-		try (BufferedInputStream bis = new BufferedInputStream(new URL("https://github.com/clickcrystals-development/ClickCrystals/releases/download/v" + getLatestClickCrystalsVersion() + "/" + version + ".jar").openStream());
-			 FileOutputStream fos = new FileOutputStream(file)) {
-
-			System.out.println("Downloading: " + version);
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			while ((bytesRead = bis.read(buffer, 0, 1024)) != -1) {
-				fos.write(buffer, 0, bytesRead);
-			}
-
-			if (!wasBefore) {
-				System.out.println("ClickCrystals has been installed. Please restart the game.");
-				System.exit(-1);
-			}
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error during ClickCrystals installation", e);
-		}
+		Info info = requestInfo();
+		downloadAsset(info);
 	}
 
-	private static String getLatestClickCrystalsVersion() {
-		String version = "";
+	public static Info requestInfo() {
 		try {
-			URL url = new URL("https://itzispyder.github.io/clickcrystals/info.html");
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("GET");
+			URL url = URI.create(INFO_LINK).toURL();
+			InputStream is = url.openStream();
+			String json = new String(is.readAllBytes());
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			StringBuilder content = new StringBuilder();
-			String inputLine;
-			while ((inputLine = in.readLine()) != null) {
-				content.append(inputLine);
-			}
-			in.close();
+			is.close();
 
-			JsonObject jsonObject = JsonParser.parseString(content.toString()).getAsJsonObject();
-			version = jsonObject.get("latest").getAsString();
-		} catch (Exception e) {
-			LOGGER.log(Level.SEVERE, "Error fetching the latest ClickCrystals version", e);
+			Gson gson = new Gson();
+			Info info = gson.fromJson(json, Info.class);
+			LOGGER.info("Requested info: {}", gson.toJson(info));
+			return info;
 		}
-		return version;
+		catch (Exception ex) {
+			LOGGER.error("An unexpected error occurred while trying to download mod information from {}: {}", INFO_LINK, ex);
+			ex.printStackTrace();
+			return new Info();
+		}
 	}
 
-	private static String getGameVersion() {
-		FabricLoader loader = FabricLoader.getInstance();
-		ModContainer container = loader.getModContainer("minecraft").orElse(null);
-		String gameVersion = null;
-		if (container != null) {
-			gameVersion = container.getMetadata().getVersion().getFriendlyString();
+	public static void downloadAsset(Info info) {
+		try {
+			URL url = URI.create(info.getFile()).toURL();
+			FabricLoader loader = FabricLoader.getInstance();
+			File gameDir = loader.getGameDir().toFile();
+			Optional<ModContainer> clickcrystals = loader.getModContainer("clickcrystals");
+
+			LOGGER.info("Checking for environment...");
+			if (clickcrystals.isPresent()) {
+				String version = clickcrystals.get().getMetadata().getVersion().getFriendlyString();
+				if (version.contains(info.latest)) {
+					LOGGER.info("ClickCrystals is UP-TO-DATE!");
+					return;
+				}
+			}
+
+			LOGGER.info("Preparing for install...");
+
+			File file = new File("%s/mods/%s".formatted(gameDir, info.getAsset()));
+
+			if (!file.getParentFile().exists())
+				file.getParentFile().mkdirs();
+			if (!file.exists())
+				file.createNewFile();
+
+			InputStream is = url.openStream();
+			FileOutputStream fos = new FileOutputStream(file);
+			byte[] data = is.readAllBytes();
+			double size = Math.floor(data.length / 10000.0) / 100.0;
+
+			LOGGER.info("Downloading ClickCrystals {} ({} MB)", info.latest, size);
+
+			fos.write(data);
+			fos.flush();
+			fos.close();
+			is.close();
+
+			LOGGER.info("ClickCrystals Installation Completed Successfully!");
 		}
-		return switch (Objects.requireNonNull(gameVersion)) {
-			case "1.20.1" -> "1.20";
-			case "1.20.3" -> "1.20.4";
-			case "1.20.5" -> "1.20.6";
-			default -> gameVersion;
-		};
+		catch (Exception ex) {
+			LOGGER.error("An unexpected error occurred while trying to install ClickCrystals: {}", ex.getMessage());
+			ex.printStackTrace();
+		}
+	}
+
+	public static class Info {
+		public String latest = "unknown";
+		public final Map<String, String> versionMappings = new HashMap<>();
+
+		public String getGameVersion() {
+			FabricLoader loader = FabricLoader.getInstance();
+			Optional<ModContainer> minecraft = loader.getModContainer("minecraft");
+
+			if (minecraft.isEmpty())
+				throw new IllegalArgumentException("Minecraft is not installed!");
+
+			String version = minecraft.get().getMetadata().getVersion().getFriendlyString();
+			return versionMappings.getOrDefault(version, "null");
+		}
+
+		public String getAsset() {
+			return "ClickCrystals-%s-%s.jar".formatted(getGameVersion(), latest);
+		}
+
+		public String getFile() {
+			return "%s/releases/download/v%s/%s".formatted(REPO, latest, getAsset());
+		}
 	}
 }
