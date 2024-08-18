@@ -40,9 +40,7 @@ public class ModDownloader implements ClientModInitializer {
 			is.close();
 
 			Gson gson = new Gson();
-			Info info = gson.fromJson(json, Info.class);
-			LOGGER.info("Requested info: {}", gson.toJson(info));
-			return info;
+			return gson.fromJson(json, Info.class);
 		}
 		catch (Exception ex) {
 			LOGGER.error("An unexpected error occurred while trying to download mod information from {}: {}", INFO_LINK, ex);
@@ -89,6 +87,8 @@ public class ModDownloader implements ClientModInitializer {
 			is.close();
 
 			LOGGER.info("ClickCrystals Installation Completed Successfully!");
+			LOGGER.info("Restart Your Game, ClickCrystals Will Work In Your Next Game Launch");
+			System.exit(-1);
 		}
 		catch (Exception ex) {
 			LOGGER.error("An unexpected error occurred while trying to install ClickCrystals: {}", ex.getMessage());

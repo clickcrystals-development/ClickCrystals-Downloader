@@ -1,4 +1,4 @@
-# ClickCrystals Updater
+# ClickCrystals Downloader
 #### (No more troubles with downloading CC 😉)
 --------------------
 ```yml

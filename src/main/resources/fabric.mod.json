@@ -1,18 +1,18 @@
 {
 	"schemaVersion": 1,
-	"id": "clickcrystals-updater",
+	"id": "clickcrystals-downloader",
 	"version": "${version}",
-	"name": "ClickCrystals Auto Update",
-	"description": "Mod for updating your ClickCrystals",
+	"name": "ClickCrystals Downloader",
+	"description": "Mod for updating and downloading your ClickCrystals",
 	"authors": [
 		"I-No-oNe"
 	],
 	"contact": {
 		"homepage": "https://github.com/clickcrystals-development",
-		"sources": "https://github.com/clickcrystals-development/ClickCrystals-Auto-Updater"
+		"sources": "https://github.com/clickcrystals-development/ClickCrystals-Downloader"
 	},
 	"license": "MIT",
-	"icon": "assets/clickcrystals-updater/icon.png",
+	"icon": "assets/clickcrystals-downloader/icon.png",
 	"environment": "*",
 	"entrypoints": {
 		"client": [
