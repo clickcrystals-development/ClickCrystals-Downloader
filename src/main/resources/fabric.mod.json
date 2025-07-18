@@ -1,31 +1,31 @@
 {
-	"schemaVersion": 1,
-	"id": "clickcrystals-downloader",
-	"version": "${version}",
-	"name": "ClickCrystals Downloader",
-	"description": "Mod for updating and downloading your ClickCrystals",
-	"authors": [
-		"I-No-oNe"
-	],
-	"contact": {
-		"homepage": "https://github.com/clickcrystals-development",
-		"sources": "https://github.com/clickcrystals-development/ClickCrystals-Downloader"
-	},
-	"license": "MIT",
-	"icon": "assets/clickcrystals-downloader/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"client": [
-			"net.i_no_am.clickcrystals.ModDownloader"
-		]
-	},
-	"depends": {
-		"fabricloader": ">=${loader_version}",
-		"minecraft": ">=1.20",
-			"java": ">=17",
-		"fabric-api": "*"
-	},
-	"suggests": {
-		"another-mod": "ClickCrystals"
-	}
+  "schemaVersion": 1,
+  "id": "clickcrystals-downloader",
+  "version": "${version}",
+  "name": "ClickCrystals Downloader",
+  "description": "Mod for updating and downloading your ClickCrystals",
+  "authors": [
+    "I-No-oNe"
+  ],
+  "contact": {
+    "homepage": "https://github.com/clickcrystals-development",
+    "sources": "https://github.com/clickcrystals-development/ClickCrystals-Downloader"
+  },
+  "license": "MIT",
+  "icon": "assets/clickcrystals-downloader/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "preLaunch": [
+      "net.i_no_am.clickcrystals.ModDownloader"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=1.20",
+    "java": ">=17",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "clickcrystals"
+  }
 }
